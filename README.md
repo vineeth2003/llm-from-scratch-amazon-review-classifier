@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GPT-based Text Classification with LoRA</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
