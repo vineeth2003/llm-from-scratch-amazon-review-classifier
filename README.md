@@ -5,30 +5,52 @@
     <title>GPT-based Text Classification with LoRA</title>
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
             max-width: 900px;
             margin: auto;
             padding: 20px;
             color: #222;
+            background-color: #fdfdfd;
         }
         h1, h2, h3 {
             color: #0b5394;
+            margin-top: 1.5em;
+        }
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 0.5em;
+        }
+        h2 {
+            font-size: 1.7em;
+        }
+        h3 {
+            font-size: 1.3em;
         }
         code, pre {
             background: #f4f4f4;
-            padding: 6px;
-            border-radius: 4px;
+            padding: 6px 8px;
+            border-radius: 5px;
             font-family: Consolas, monospace;
+            font-size: 0.95em;
         }
         pre {
             overflow-x: auto;
         }
-        ul {
+        ul, ol {
             margin-left: 20px;
+            margin-bottom: 1em;
         }
         hr {
-            margin: 30px 0;
+            margin: 40px 0;
+            border: 1px solid #ddd;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #c00000;
         }
     </style>
 </head>
@@ -37,25 +59,20 @@
 <h1>GPT-based Text Classification with LoRA</h1>
 
 <p>
-This project implements a <strong>binary text classification model (Positive / Negative)</strong>
-using a <strong>GPT-style Transformer</strong> with
-<strong>LoRA (Low-Rank Adaptation)</strong> for parameter-efficient fine-tuning.
-</p>
-
-<p>
-The focus is on <strong>correct padding-aware pooling</strong>,
-efficient training, and avoiding silent model failures that often occur in GPT classifiers.
+This project implements a <strong>binary text classification model</strong> (Positive / Negative) using a 
+<strong>GPT-style Transformer</strong> with <strong>LoRA (Low-Rank Adaptation)</strong> for efficient fine-tuning. 
+The implementation emphasizes correct <em>padding-aware pooling</em>, reliable training, and avoiding common pitfalls in GPT classifiers.
 </p>
 
 <hr>
 
-<h2>🚀 Features</h2>
+<h2>🚀 Key Features</h2>
 <ul>
     <li>GPT-based sequence classification</li>
-    <li>Parameter-efficient fine-tuning using <strong>LoRA</strong></li>
-    <li>Padding-aware pooling (critical fix)</li>
-    <li>Frozen backbone with trainable adapters</li>
-    <li>Clean PyTorch training & inference pipeline</li>
+    <li>Parameter-efficient fine-tuning via <strong>LoRA</strong></li>
+    <li>Padding-aware pooling to prevent representation collapse</li>
+    <li>Frozen GPT backbone with trainable adapters</li>
+    <li>Clean PyTorch-based training and inference pipeline</li>
     <li>GPU-compatible (CUDA / Google Colab)</li>
 </ul>
 
@@ -66,9 +83,9 @@ efficient training, and avoiding silent model failures that often occur in GPT c
 <pre>
 Input Text
    ↓
-Tokenizer (pad + truncate)
+Tokenizer (padding + truncation)
    ↓
-Input IDs (batch, seq_len)
+Input IDs (batch_size × sequence_length)
    ↓
 GPT Transformer (frozen)
    ↓
@@ -84,9 +101,9 @@ Logits (Positive / Negative)
 <h2>📦 Requirements</h2>
 <ul>
     <li>Python ≥ 3.9</li>
-    <li>PyTorch</li>
-    <li>Transformers / custom GPT implementation</li>
-    <li>CUDA (optional but recommended)</li>
+    <li>PyTorch ≥ 2.0</li>
+    <li>Transformers or a custom GPT implementation</li>
+    <li>CUDA-compatible GPU (optional but recommended)</li>
 </ul>
 
 <hr>
@@ -94,7 +111,7 @@ Logits (Positive / Negative)
 <h2>🔤 Tokenization</h2>
 
 <p>
-Fixed-length padding is used for efficient batching:
+Efficient batching is ensured with fixed-length padding:
 </p>
 
 <pre><code>
@@ -108,47 +125,44 @@ tokenizer(
 </code></pre>
 
 <p>
-The <code>pad_token_id</code> is explicitly used during pooling to prevent PAD-token leakage.
+The <code>pad_token_id</code> is explicitly used in pooling to avoid PAD-token leakage.
 </p>
 
 <hr>
 
-<h2>🧩 GPTForClassification</h2>
+<h2>🧩 GPTForClassification Wrapper</h2>
 
 <p>
-A wrapper around the GPT model that:
+This wrapper around the GPT model performs:
 </p>
 <ul>
-    <li>Extracts token embeddings</li>
-    <li>Applies padding-aware pooling</li>
-    <li>Feeds the pooled representation into a classifier head</li>
+    <li>Extraction of token embeddings</li>
+    <li>Padding-aware pooling</li>
+    <li>Forwarding pooled embeddings into a classification head</li>
 </ul>
 
-<h3>Padding-aware pooling (CRITICAL FIX)</h3>
+<h3>Padding-aware Pooling (CRITICAL FIX)</h3>
 
-<p><strong>❌ Incorrect (causes model collapse):</strong></p>
+<p><span class="highlight">Incorrect approach (causes collapse):</span></p>
 <pre><code>
 x = x[:, -1, :]
 </code></pre>
 
-<p><strong>✅ Correct (used in this project):</strong></p>
+<p><span class="highlight">Correct approach:</span></p>
 <pre><code>
 attention_mask = (input_ids != pad_token_id)
 last_token_idx = attention_mask.sum(dim=1) - 1
 x = x[torch.arange(x.size(0)), last_token_idx]
 </code></pre>
 
-<p>
-This guarantees the model always uses the <strong>last real token</strong> instead of PAD.
-</p>
+<p>This ensures the model always uses the <strong>last real token</strong> rather than PAD.</p>
 
 <hr>
 
-<h2>🪜 LoRA (Low-Rank Adaptation)</h2>
+<h2>🪜 LoRA: Low-Rank Adaptation</h2>
 
 <p>
-Instead of fine-tuning all GPT parameters, LoRA adapters are injected into
-the <strong>Q, K, V attention projections</strong>.
+LoRA enables parameter-efficient fine-tuning by injecting trainable adapters into the <strong>Q, K, V attention projections</strong>.
 </p>
 
 <h3>LoRA Formula</h3>
@@ -157,9 +171,9 @@ output = W(x) + scaling * (x @ A @ B)
 </code></pre>
 
 <ul>
-    <li>Original GPT weights are frozen</li>
-    <li>Only LoRA matrices <code>A</code> and <code>B</code> are trained</li>
-    <li>Massively reduces trainable parameters</li>
+    <li>Original GPT weights remain frozen</li>
+    <li>Only LoRA matrices <code>A</code> and <code>B</code> are updated</li>
+    <li>Significantly reduces trainable parameters</li>
 </ul>
 
 <hr>
@@ -167,7 +181,7 @@ output = W(x) + scaling * (x @ A @ B)
 <h2>❄️ Parameter Freezing Strategy</h2>
 
 <ol>
-    <li>Freeze the entire model</li>
+    <li>Freeze the entire GPT model</li>
     <li>Unfreeze only:
         <ul>
             <li>LoRA parameters</li>
@@ -177,24 +191,19 @@ output = W(x) + scaling * (x @ A @ B)
 </ol>
 
 <pre><code>
-if "lora_" in name or "classifier" in name:
-    p.requires_grad = True
+for name, p in clf_model.named_parameters():
+    if "lora_" in name or "classifier" in name:
+        p.requires_grad = True
 </code></pre>
 
-<p>
-Trainable parameters include:
-</p>
-<ul>
-    <li><code>lora_A</code>, <code>lora_B</code> (attention layers)</li>
-    <li><code>classifier.weight</code>, <code>classifier.bias</code></li>
-</ul>
+<p>Trainable parameters include <code>lora_A</code>, <code>lora_B</code>, and the classifier weights and biases.</p>
 
 <hr>
 
 <h2>⚙️ Optimizer</h2>
 
 <p>
-Only trainable parameters are passed to the optimizer:
+Pass only trainable parameters to the optimizer:
 </p>
 
 <pre><code>
@@ -204,9 +213,7 @@ optimizer = torch.optim.AdamW(
 )
 </code></pre>
 
-<p>
-This prevents accidental updates to frozen GPT weights.
-</p>
+<p>This prevents unintended updates to frozen GPT weights.</p>
 
 <hr>
 
@@ -214,8 +221,7 @@ This prevents accidental updates to frozen GPT weights.
 
 <pre><code>
 clf_model.train()
-
-for epoch in range(2):
+for epoch in range(num_epochs):
     for batch in train_loader:
         input_ids = batch["input_ids"].to(device)
         labels = batch["labels"].to(device)
@@ -229,7 +235,7 @@ for epoch in range(2):
 </code></pre>
 
 <ul>
-    <li>Uses <code>CrossEntropyLoss</code></li>
+    <li>Loss function: <code>CrossEntropyLoss</code></li>
     <li>Short training to prevent overfitting</li>
     <li>Fully GPU-compatible</li>
 </ul>
@@ -246,51 +252,49 @@ def predict(text):
     return "Positive" if pred == 1 else "Negative"
 </code></pre>
 
-<p>
-Predictions correctly handle padding and batching.
-</p>
+<p>Predictions properly handle padding and batching.</p>
 
 <hr>
 
-<h2>🛑 Common Pitfall (Solved)</h2>
+<h2>🛑 Common Pitfall Solved</h2>
 
-<p><strong>Problem:</strong> Model always predicted “Positive”.</p>
+<p><strong>Issue:</strong> Model predicted only “Positive”.</p>
 
-<p><strong>Root cause:</strong></p>
+<p><strong>Cause:</strong></p>
 <ul>
     <li>Using last token embedding</li>
     <li>Last token often PAD</li>
     <li>PAD embeddings are constant → representation collapse</li>
 </ul>
 
-<p><strong>Solution:</strong> Padding-aware pooling using <code>pad_token_id</code>.</p>
+<p><strong>Solution:</strong> Apply <code>padding-aware pooling</code> using <code>pad_token_id</code>.</p>
 
 <hr>
 
 <h2>✅ Key Takeaways</h2>
 <ul>
-    <li>Padding handling is critical for GPT classifiers</li>
-    <li>LoRA enables efficient fine-tuning on limited hardware</li>
-    <li>Always verify trainable parameters</li>
-    <li>Silent bugs can completely break learning</li>
+    <li>Handling padding correctly is critical for GPT classifiers</li>
+    <li>LoRA allows efficient fine-tuning on limited hardware</li>
+    <li>Always verify which parameters are trainable</li>
+    <li>Silent bugs can completely hinder learning</li>
 </ul>
 
 <hr>
 
 <h2>📌 Future Extensions</h2>
 <ul>
-    <li>Multi-class classification</li>
-    <li>Evaluation metrics (Accuracy, F1)</li>
-    <li>Saving & loading LoRA adapters</li>
-    <li>HuggingFace integration</li>
+    <li>Support multi-class classification</li>
+    <li>Implement evaluation metrics (Accuracy, F1)</li>
+    <li>Save and load LoRA adapters</li>
+    <li>Integrate with HuggingFace ecosystem</li>
 </ul>
 
 <hr>
 
 <h2>👤 Author</h2>
 <p>
-Built by <strong>Vineeth Benakashetty</strong><br>
-Focused on practical and efficient NLP model design.
+Developed by <strong>Vineeth Benakashetty</strong><br>
+Focus: Practical and efficient NLP model design.
 </p>
 
 <hr>
