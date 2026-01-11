@@ -258,6 +258,7 @@ Focused on practical and efficient NLP model design.
 
 <hr>
 
+</body>
 <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -286,6 +287,4 @@ Focused on practical and efficient NLP model design.
             margin: 30px 0;
         }
     </style>
-
-</body>
 </html>
