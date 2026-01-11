@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
+<style>
         body {
             font-family: Arial, Helvetica, sans-serif;
             line-height: 1.6;
@@ -30,6 +26,11 @@
             margin: 30px 0;
         }
     </style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 </head>
 <body>
 
