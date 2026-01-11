@@ -2,6 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            color: #222;
+        }
+        h1, h2, h3 {
+            color: #0b5394;
+        }
+        code, pre {
+            background: #f4f4f4;
+            padding: 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+        }
+        pre {
+            overflow-x: auto;
+        }
+        ul, ol {
+            margin-left: 20px;
+        }
+        hr {
+            margin: 30px 0;
+        }
+    </style>
 </head>
 <body>
 
@@ -259,32 +287,4 @@ Focused on practical and efficient NLP model design.
 <hr>
 
 </body>
-<style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
-            color: #222;
-        }
-        h1, h2, h3 {
-            color: #0b5394;
-        }
-        code, pre {
-            background: #f4f4f4;
-            padding: 6px;
-            border-radius: 4px;
-            font-family: Consolas, monospace;
-        }
-        pre {
-            overflow-x: auto;
-        }
-        ul, ol {
-            margin-left: 20px;
-        }
-        hr {
-            margin: 30px 0;
-        }
-    </style>
 </html>
